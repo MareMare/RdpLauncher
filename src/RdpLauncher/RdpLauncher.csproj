@@ -5,10 +5,16 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
+    <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,9 +25,7 @@
   </ItemGroup>
 
   <Target Name="CopyCustomStaticAssets" AfterTargets="Publish">
-    <Copy
-      SourceFiles="@(TemplateFiles)"
-      DestinationFiles="@(TemplateFiles->'$(PublishDir)templates\%(Link)')" />
+    <Copy SourceFiles="@(TemplateFiles)" DestinationFiles="@(TemplateFiles->'$(PublishDir)templates\%(Link)')" />
   </Target>
 
 </Project>
