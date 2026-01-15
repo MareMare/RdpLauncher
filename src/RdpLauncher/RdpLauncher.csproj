@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" Version="0.54.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- プロジェクトルートからの相対パスを取得するために Link メタデータを付与 -->
+    <TemplateFiles Include="templates\**\*">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </TemplateFiles>
+  </ItemGroup>
+
+  <Target Name="CopyCustomStaticAssets" AfterTargets="Publish">
+    <Copy
+      SourceFiles="@(TemplateFiles)"
+      DestinationFiles="@(TemplateFiles->'$(PublishDir)templates\%(Link)')" />
+  </Target>
+
+</Project>
