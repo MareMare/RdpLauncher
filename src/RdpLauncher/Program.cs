@@ -85,6 +85,7 @@ static string ToDisplayPath(string absolutePath)
         {
             return $".{Path.DirectorySeparatorChar}{relative}";
         }
+
         return relative;
     }
     catch
@@ -158,32 +159,33 @@ static void ProcessRdpFile(
     string[] monitorIds)
 {
     var lines = File.ReadAllLines(templatePath, Encoding.UTF8);
-    var updatedLines = new List<string>();
 
     var selectedMonitors = string.Join(",", monitorIds);
     var useMultimon = monitorIds.Length > 1 ? 1 : 0;
 
-    foreach (var line in lines)
+    // 先頭に固定で配置したいキーと値（定義順が先頭の並び順になります）
+    var desired = new (string Key, string Value)[]
     {
-        if (line.StartsWith("selectedmonitors:s:"))
-        {
-            updatedLines.Add($"selectedmonitors:s:{selectedMonitors}");
-        }
-        else if (line.StartsWith("use multimon:i:"))
-        {
-            updatedLines.Add($"use multimon:i:{useMultimon}");
-        }
-        else if (line.StartsWith("full address:s:"))
-        {
-            updatedLines.Add($"full address:s:{hostname}");
-        }
-        else
-        {
-            updatedLines.Add(line);
-        }
+        ("selectedmonitors:s:", selectedMonitors),
+        ("use multimon:i:", useMultimon.ToString()),
+        ("full address:s:", hostname),
+    };
+
+    // 1) テンプレートから対象キーの既存行をすべて取り除く
+    var bodies = lines
+        .Where(line => !desired.Any(d => line.StartsWith(d.Key, StringComparison.OrdinalIgnoreCase)))
+        .ToList();
+
+    // 2) 結果: 先頭に desired を定義順で挿入し、その後に残りを続ける
+    var result = new List<string>(desired.Length + bodies.Count);
+    foreach ((string key, string value) in desired)
+    {
+        result.Add($"{key}{value}");
     }
 
-    File.WriteAllLines(outputPath, updatedLines, Encoding.UTF8);
+    result.AddRange(bodies);
+
+    File.WriteAllLines(outputPath, result, Encoding.UTF8);
 }
 
 static void LaunchRdp(string rdpPath)
