@@ -7,10 +7,12 @@ on:
     paths:
       - ".github/workflows/ci.yml"
       - "src/**"
+      - "global.json"
   pull_request: # run on all PR actions (push, open, reopen)
     paths:
       - ".github/workflows/ci.yml"
       - "src/**"
+      - "global.json"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
