@@ -3,8 +3,11 @@ using System.Text;
 using System.Text.Json;
 using Spectre.Console;
 
+using var mstsc = RunMstscListMonitors();
+
 // Configuration management
-var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "rdp-config.json");
+var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+var configPath = Path.Combine(baseDir, "rdp-config.json");
 var config = LoadConfig(configPath);
 
 // Get hostname
@@ -48,14 +51,14 @@ UpdateConfig(config, hostname, monitorInput);
 SaveConfig(configPath, config);
 
 // Process RDP file
-var templatePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "templates", "template.rdp");
+var templatePath = Path.Combine(baseDir, "templates", "template.rdp");
 if (!File.Exists(templatePath))
 {
     AnsiConsole.MarkupLine($"[red]テンプレートファイル '{ToDisplayPath(templatePath)}' が見つかりません。[/]");
     return;
 }
 
-var outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{hostname}-{string.Join("-", monitorIds)}.rdp");
+var outputPath = Path.Combine(baseDir, $"{hostname}-{string.Join("-", monitorIds)}.rdp");
 ProcessRdpFile(templatePath, outputPath, hostname, monitorIds);
 
 AnsiConsole.MarkupLine($"[green]RDPファイルを作成しました: {ToDisplayPath(outputPath)}[/]");
@@ -72,7 +75,6 @@ return;
 static string ToDisplayPath(string absolutePath)
 {
     var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-
     try
     {
         // .NET 6+ で利用可能
@@ -208,6 +210,54 @@ static void LaunchRdp(string rdpPath)
     }
 }
 
+static IDisposable RunMstscListMonitors()
+{
+    var mstsc = new MstscProcess();
+    mstsc.Start();
+    return mstsc;
+}
+
+internal sealed class MstscProcess : IDisposable
+{
+    private readonly Process _process;
+
+    public MstscProcess()
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "mstsc.exe",
+            Arguments = "/l",
+            UseShellExecute = true,
+        };
+        _process = new Process
+        {
+            StartInfo = startInfo,
+        };
+    }
+
+    public void Start()
+    {
+        try
+        {
+            _process.Start();
+            AnsiConsole.MarkupLine("[grey]mstsc /l 実行済み（モニター一覧を取得）。[/]");
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[yellow]mstsc /l の実行に失敗しました: {ex.Message}（処理は継続します）[/]");
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!_process.HasExited)
+        {
+            _process.Kill();
+        }
+
+        _process.Dispose();
+    }
+}
 internal static class JsonSerializerOptionsCache
 {
     public static readonly JsonSerializerOptions Default = new()

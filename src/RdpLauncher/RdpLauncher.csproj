@@ -18,6 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="templates\template.rdp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- プロジェクトルートからの相対パスを取得するために Link メタデータを付与 -->
     <TemplateFiles Include="templates\**\*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
