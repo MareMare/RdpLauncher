@@ -138,3 +138,9 @@ dotnet publish .\src\RdpLauncher -c Release -r win-x64 -p:PublishSingleFile=true
 ## ライセンス
 
 このプロジェクトのライセンスについては、[LICENSE](LICENSE) ファイルを参照してください。
+
+## 参考
+
+以下の記事に感謝します。
+
+- [How to remote desktop fullscreen RDP with just SOME of your multiple monitors - Scott Hanselman's Blog](https://www.hanselman.com/blog/how-to-remote-desktop-fullscreen-rdp-with-just-some-of-your-multiple-monitors)
